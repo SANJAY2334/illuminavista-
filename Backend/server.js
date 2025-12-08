@@ -14,7 +14,7 @@ const app = express();
 // CORS – allow only your frontend
 app.use(cors({
   origin: process.env.FRONTEND_URL,
-  methods: ["GET", "POST"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
