@@ -8,6 +8,7 @@ export default function AdminDashboard() {
   const [replyText, setReplyText] = useState("");
 
   const token = localStorage.getItem("ADMIN_TOKEN");
+  const API = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     if (!token) {
@@ -21,9 +22,12 @@ export default function AdminDashboard() {
   async function fetchContacts() {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/contacts", {
-        headers: { Authorization: "Bearer " + token },
+      const res = await fetch(`${API}/api/admin/contacts`, {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
       });
+
       if (!res.ok) throw new Error("Failed to fetch contacts");
       const data = await res.json();
       setContacts(data.contacts || []);
@@ -38,12 +42,17 @@ export default function AdminDashboard() {
     if (!replyText.trim()) return alert("Type a reply");
 
     try {
-      const res = await fetch(`/api/admin/reply/${id}`, {
+      const res = await fetch(`${API}/api/admin/reply/${id}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token,
+        },
         body: JSON.stringify({ replyMessage: replyText }),
       });
+
       if (!res.ok) throw new Error("Failed to send reply");
+
       alert("Reply sent successfully");
       setSelected(null);
       setReplyText("");
@@ -54,12 +63,17 @@ export default function AdminDashboard() {
 
   async function deleteContact(id) {
     if (!confirm("Delete this contact?")) return;
+
     try {
-      const res = await fetch(`/api/admin/contact/${id}`, {
+      const res = await fetch(`${API}/api/admin/contact/${id}`, {
         method: "DELETE",
-        headers: { Authorization: "Bearer " + token },
+        headers: {
+          Authorization: "Bearer " + token,
+        },
       });
+
       if (!res.ok) throw new Error("Failed to delete contact");
+
       setContacts((c) => c.filter((item) => item._id !== id));
     } catch (err) {
       alert(err.message);
@@ -108,6 +122,7 @@ export default function AdminDashboard() {
                     <th className="px-6 py-4 font-semibold text-right">Actions</th>
                   </tr>
                 </thead>
+
                 <tbody className="divide-y divide-gray-700/50">
                   {contacts.map((c) => (
                     <tr key={c._id} className="hover:bg-white/5 transition-colors">
@@ -141,6 +156,7 @@ export default function AdminDashboard() {
                       </td>
                     </tr>
                   ))}
+
                   {contacts.length === 0 && (
                     <tr>
                       <td colSpan="5" className="px-6 py-12 text-center text-gray-400">
@@ -174,7 +190,9 @@ export default function AdminDashboard() {
 
                 <div className="mb-4 p-4 bg-black/20 rounded-lg border border-gray-700/50">
                   <p className="text-sm text-gray-400 mb-1">Original Message:</p>
-                  <p className="text-gray-200 italic">"{selected.message}"</p>
+                  <p className="text-gray-200 italic">
+                    "{selected.message}"
+                  </p>
                 </div>
 
                 <textarea
@@ -189,12 +207,13 @@ export default function AdminDashboard() {
                   <button
                     onClick={() => {
                       setSelected(null);
-                      setReplyText("");
+                      setReplyText("");  
                     }}
                     className="px-6 py-2 rounded-lg border border-gray-600 text-gray-300 hover:bg-gray-800 transition-colors"
                   >
                     Cancel
                   </button>
+
                   <button
                     onClick={() => sendReply(selected._id)}
                     className="btn"
