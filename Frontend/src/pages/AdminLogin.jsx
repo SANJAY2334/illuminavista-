@@ -6,22 +6,27 @@ export default function AdminLogin() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const API = import.meta.env.VITE_API_URL;
+
   async function handleLogin(e) {
     e.preventDefault();
+
     if (!email || !password) {
       alert("Enter email and password");
       return;
     }
 
     setLoading(true);
+
     try {
-      const res = await fetch("/api/admin/login", {
+      const res = await fetch(`${API}/api/admin/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
       const data = await res.json();
+
       if (!res.ok) {
         alert(data.error || "Login failed");
         setLoading(false);
@@ -30,6 +35,7 @@ export default function AdminLogin() {
 
       localStorage.setItem("ADMIN_TOKEN", data.token);
       window.location.href = "/admin/dashboard";
+
     } catch (err) {
       alert("Login error");
     } finally {
@@ -39,8 +45,6 @@ export default function AdminLogin() {
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
-      {/* Background Elements are handled globally in index.css, but we can add specific flares if needed */}
-
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -53,7 +57,9 @@ export default function AdminLogin() {
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
-            <label className="block mb-2 text-gray-300 font-medium tracking-wide">Email Address</label>
+            <label className="block mb-2 text-gray-300 font-medium tracking-wide">
+              Email Address
+            </label>
             <input
               type="email"
               className="w-full p-3 bg-black/30 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[var(--color-gold)] focus:ring-1 focus:ring-[var(--color-gold)] transition-all duration-300"
@@ -64,7 +70,9 @@ export default function AdminLogin() {
           </div>
 
           <div>
-            <label className="block mb-2 text-gray-300 font-medium tracking-wide">Password</label>
+            <label className="block mb-2 text-gray-300 font-medium tracking-wide">
+              Password
+            </label>
             <input
               type="password"
               className="w-full p-3 bg-black/30 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[var(--color-gold)] focus:ring-1 focus:ring-[var(--color-gold)] transition-all duration-300"
@@ -86,7 +94,10 @@ export default function AdminLogin() {
         <div className="mt-8 text-center">
           <p className="text-gray-400 text-sm">
             New Administrator?{" "}
-            <a href="/admin/register" className="text-[var(--color-gold)] hover:text-[var(--color-gold-glow)] transition-colors font-semibold">
+            <a
+              href="/admin/register"
+              className="text-[var(--color-gold)] hover:text-[var(--color-gold-glow)] transition-colors font-semibold"
+            >
               Register Access
             </a>
           </p>
