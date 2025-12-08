@@ -96,6 +96,9 @@ app.post("/api/contact", async (req, res) => {
   }
 });
 
+console.log("URI from ENV:", JSON.stringify(process.env.MONGO_URI));
+
+
 // Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
