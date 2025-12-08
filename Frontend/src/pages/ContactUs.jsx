@@ -5,25 +5,27 @@ export default function ContactUs() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    countryCode: "+91", // default India
+    countryCode: "+91",
     phone: "",
     message: "",
   });
+
   const [status, setStatus] = useState("");
 
-  // Handle input change
+  // API Base URL from .env
+  const API = import.meta.env.VITE_API_URL;
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  // Handle form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus("Sending...");
 
     try {
-      const res = await fetch("http://localhost:5000/api/contact", {
+      const res = await fetch(`${API}/api/contact`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -33,7 +35,13 @@ export default function ContactUs() {
 
       if (data.success) {
         setStatus("✅ Message sent successfully!");
-        setFormData({ name: "", email: "", countryCode: "+91", phone: "", message: "" });
+        setFormData({
+          name: "",
+          email: "",
+          countryCode: "+91",
+          phone: "",
+          message: "",
+        });
       } else {
         setStatus("❌ Failed to send message. Try again.");
       }
@@ -76,7 +84,9 @@ export default function ContactUs() {
                 </div>
                 <div>
                   <h4 className="text-gold font-semibold mb-1">Visit Us</h4>
-                  <p className="text-pearl/70">C7 Nigde Nagar, B.T.Kawde Road,<br />Ghorpadi, Pune-411001</p>
+                  <p className="text-pearl/70">
+                    C7 Nigde Nagar, B.T.Kawde Road,<br />Ghorpadi, Pune-411001
+                  </p>
                 </div>
               </div>
 
@@ -102,7 +112,7 @@ export default function ContactUs() {
             </div>
           </div>
 
-          {/* Map Placeholder */}
+          {/* Map */}
           <div className="h-64 rounded-2xl overflow-hidden border border-white/10 grayscale hover:grayscale-0 transition-all duration-500">
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3783.566373327663!2d73.91166631489248!3d18.50329998741915!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2c18f343510e9%3A0x664062080477804a!2sB.T.%20Kawade%20Rd%2C%20Ghorpadi%2C%20Pune%2C%20Maharashtra!5e0!3m2!1sen!2sin!4v1625123456789!5m2!1sen!2sin"
@@ -123,7 +133,6 @@ export default function ContactUs() {
           transition={{ delay: 0.4, duration: 0.8 }}
           className="bg-charcoal rounded-2xl p-8 md:p-10 border border-champagne/20 shadow-2xl relative overflow-hidden"
         >
-          {/* Decorative Glow */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
 
           <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
