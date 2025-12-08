@@ -11,39 +11,47 @@ dotenv.config();
 
 const app = express();
 
-// Middleware
-app.use(cors());
+// CORS – allow only your frontend
+app.use(cors({
+  origin: process.env.FRONTEND_URL,
+  methods: ["GET", "POST"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
 app.use(express.json());
 
-// MongoDB
+// --- Database ---
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected"))
   .catch(err => {
-    console.error("❌ MongoDB connection error:", err);
+    console.error("❌ MongoDB connection error:", err.message);
     process.exit(1);
   });
 
-// Routes
+// --- Health Route ---
+app.get("/", (req, res) => {
+  res.json({ status: "OK", message: "IlluminaVista Backend Running" });
+});
+
+// --- Admin Routes ---
 app.use("/api/admin", adminRoutes);
 
+// --- Contact Form ---
 app.post("/api/contact", async (req, res) => {
   try {
     const { name, email, phone, countryCode, message } = req.body;
 
-    // Validation
     if (!name || !email || !phone || !countryCode || !message) {
-      return res.status(400).json({
-        success: false,
-        error: "All fields are required",
-      });
+      return res.status(400).json({ success: false, error: "All fields are required" });
     }
 
-    // Save to DB
     await Contact.create({ name, email, phone, countryCode, message });
 
-    // Mail Transport
+    // Email Config (Gmail app password required)
     const transporter = nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
@@ -52,7 +60,7 @@ app.post("/api/contact", async (req, res) => {
 
     const whatsapp = `https://wa.me/${countryCode.replace("+", "")}${phone}`;
 
-    // Admin Email
+    // Send to Admin
     await transporter.sendMail({
       from: `"IlluminaVista" <${process.env.EMAIL_USER}>`,
       to: process.env.EMAIL_USER,
@@ -63,12 +71,11 @@ app.post("/api/contact", async (req, res) => {
         <p><strong>Name:</strong> ${name}</p>
         <p><strong>Email:</strong> ${email}</p>
         <p><strong>Phone:</strong> <a href="${whatsapp}">${countryCode} ${phone}</a></p>
-        <p><strong>Message:</strong></p>
         <blockquote>${message}</blockquote>
       `,
     });
 
-    // User Auto-Reply
+    // Auto Reply
     await transporter.sendMail({
       from: `"IlluminaVista" <${process.env.EMAIL_USER}>`,
       to: email,
@@ -76,30 +83,20 @@ app.post("/api/contact", async (req, res) => {
       html: `
         <h2>Hello ${name},</h2>
         <p>Thank you for contacting IlluminaVista.</p>
-        <p>Your message has been received and we will reply shortly.</p>
         <blockquote>${message}</blockquote>
         <p>- Team IlluminaVista</p>
       `,
     });
 
-    return res.json({
-      success: true,
-      message: "Message sent successfully",
-    });
+    return res.json({ success: true, message: "Message sent successfully" });
 
   } catch (err) {
-    console.error("❌ Error:", err);
-    return res.status(500).json({
-      success: false,
-      error: "Internal Server Error",
-    });
+    console.error("❌ Contact Error:", err.message);
+    return res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 });
 
-console.log("URI from ENV:", JSON.stringify(process.env.MONGO_URI));
-
-
-// Server
+// --- Server ---
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
