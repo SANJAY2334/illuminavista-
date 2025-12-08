@@ -11,11 +11,11 @@ dotenv.config();
 
 const app = express();
 
-// CORS – allow only your frontend
+// --- CORS ---
 app.use(cors({
   origin: process.env.FRONTEND_URL,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
+  allowedHeaders: ["Content-Type", "Authorization"],
 }));
 
 app.use(express.json());
@@ -24,11 +24,11 @@ app.use(express.json());
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected"))
   .catch(err => {
-    console.error("❌ MongoDB error:", err.message);
+    console.error("❌ MongoDB Error:", err.message);
     process.exit(1);
   });
 
-// --- Health Route ---
+// --- Health Check ---
 app.get("/", (req, res) => {
   res.json({ status: "OK", message: "IlluminaVista Backend Running" });
 });
@@ -45,14 +45,12 @@ app.post("/api/contact", async (req, res) => {
       return res.status(400).json({ success: false, error: "All fields are required" });
     }
 
-    // Store in DB
     await Contact.create({ name, email, phone, countryCode, message });
 
     const resend = new Resend(process.env.RESEND_API_KEY);
-
     const whatsapp = `https://wa.me/${countryCode.replace("+", "")}${phone}`;
 
-    // Send to Admin
+    // --- Send to Admin ---
     await resend.emails.send({
       from: "IlluminaVista <onboarding@resend.dev>",
       to: process.env.ADMIN_EMAIL,
@@ -64,10 +62,10 @@ app.post("/api/contact", async (req, res) => {
         <p><strong>Email:</strong> ${email}</p>
         <p><strong>Phone:</strong> <a href="${whatsapp}">${countryCode} ${phone}</a></p>
         <blockquote>${message}</blockquote>
-      `
+      `,
     });
 
-    // Auto Reply to User
+    // --- Auto reply to user ---
     await resend.emails.send({
       from: "IlluminaVista <onboarding@resend.dev>",
       to: email,
@@ -77,13 +75,13 @@ app.post("/api/contact", async (req, res) => {
         <p>Thank you for contacting IlluminaVista.</p>
         <blockquote>${message}</blockquote>
         <p>- Team IlluminaVista</p>
-      `
+      `,
     });
 
     return res.json({ success: true, message: "Message sent successfully" });
 
   } catch (err) {
-    console.error("❌ Contact Error:", err.message);
+    console.error("❌ Contact Form Error:", err.message);
     return res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 });

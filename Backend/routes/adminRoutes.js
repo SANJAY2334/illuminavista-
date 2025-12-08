@@ -7,7 +7,7 @@ import { Resend } from "resend";
 
 const router = express.Router();
 
-// JWT Auth
+// --- JWT Auth Middleware ---
 export const adminAuth = (req, res, next) => {
   const token = req.headers["authorization"]?.split(" ")[1];
   if (!token) return res.status(401).json({ error: "Unauthorized" });
@@ -21,7 +21,7 @@ export const adminAuth = (req, res, next) => {
   }
 };
 
-// Admin registration
+// --- Register ---
 router.post("/register", async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password)
@@ -33,10 +33,11 @@ router.post("/register", async (req, res) => {
 
   const admin = new Admin({ email, password });
   await admin.save();
+
   res.json({ success: true, message: "Admin account created" });
 });
 
-// Login
+// --- Login ---
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -57,13 +58,13 @@ router.post("/login", async (req, res) => {
   res.json({ token });
 });
 
-// Get all contacts
+// --- Get Contacts ---
 router.get("/contacts", adminAuth, async (req, res) => {
   const contacts = await Contact.find().sort({ createdAt: -1 });
   res.json({ contacts });
 });
 
-// Reply to a contact
+// --- Reply to Contact ---
 router.post("/reply/:id", adminAuth, async (req, res) => {
   const { replyMessage } = req.body;
   const contact = await Contact.findById(req.params.id);
@@ -73,7 +74,6 @@ router.post("/reply/:id", adminAuth, async (req, res) => {
 
   try {
     const resend = new Resend(process.env.RESEND_API_KEY);
-
     await resend.emails.send({
       from: "IlluminaVista <onboarding@resend.dev>",
       to: contact.email,
@@ -81,48 +81,52 @@ router.post("/reply/:id", adminAuth, async (req, res) => {
       html: `
         <p>Hello ${contact.name},</p>
         <p>${replyMessage}</p>
-        <hr>
         <p>— IlluminaVista Team</p>
-      `
+      `,
     });
 
     res.json({ success: true, message: "Reply email sent successfully" });
 
   } catch (err) {
-    console.error("Failed to send reply:", err);
+    console.error("Reply failed:", err);
     res.status(500).json({ error: "Failed to send reply email" });
   }
 });
 
-// Delete contact
+// --- Delete Contact (Correct Logic) ---
 router.delete("/contact/:id", adminAuth, async (req, res) => {
   try {
     const contact = await Contact.findById(req.params.id);
     if (!contact)
       return res.status(404).json({ error: "Contact not found" });
 
-    const resend = new Resend(process.env.RESEND_API_KEY);
-
-    await resend.emails.send({
-      from: "IlluminaVista <onboarding@resend.dev>",
-      to: contact.email,
-      subject: "Notice Regarding Our Services — IlluminaVista",
-      html: `
-        <div style="font-family:Arial,sans-serif;padding:20px;">
-          <h2>Hello ${contact.name},</h2>
-          <p>We regret to inform you that currently, we are not able to provide our services.</p>
-          <p>Thank you for your interest, and we apologize for the inconvenience.</p>
-        </div>
-      `
-    });
-
+    // 1️⃣ Always delete first
     await Contact.findByIdAndDelete(req.params.id);
 
-    res.json({ success: true, message: "Contact deleted & notification sent" });
+    // 2️⃣ Send email (best effort)
+    try {
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      await resend.emails.send({
+        from: "IlluminaVista <onboarding@resend.dev>",
+        to: contact.email,
+        subject: "Notice Regarding Our Services — IlluminaVista",
+        html: `
+          <div style="font-family:Arial,sans-serif;padding:20px;">
+            <h2>Hello ${contact.name},</h2>
+            <p>We regret to inform you that currently, we are not able to provide our services.</p>
+            <p>Thank you for your interest, and we apologize for the inconvenience.</p>
+          </div>
+        `,
+      });
+    } catch (emailErr) {
+      console.error("Email failed after deletion:", emailErr);
+    }
+
+    return res.json({ success: true, message: "Contact deleted successfully" });
 
   } catch (err) {
     console.error("Delete failed:", err);
-    res.status(500).json({ error: "Failed to delete contact or send email" });
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
