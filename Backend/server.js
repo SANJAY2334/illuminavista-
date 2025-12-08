@@ -1,8 +1,8 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import nodemailer from "nodemailer";
 import mongoose from "mongoose";
+import { Resend } from "resend";
 
 import adminRoutes from "./routes/adminRoutes.js";
 import Contact from "./models/Contact.js";
@@ -24,7 +24,7 @@ app.use(express.json());
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected"))
   .catch(err => {
-    console.error("❌ MongoDB connection error:", err.message);
+    console.error("❌ MongoDB error:", err.message);
     process.exit(1);
   });
 
@@ -45,39 +45,31 @@ app.post("/api/contact", async (req, res) => {
       return res.status(400).json({ success: false, error: "All fields are required" });
     }
 
+    // Store in DB
     await Contact.create({ name, email, phone, countryCode, message });
 
-    // Email Config (Gmail app password required)
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+    const resend = new Resend(process.env.RESEND_API_KEY);
 
     const whatsapp = `https://wa.me/${countryCode.replace("+", "")}${phone}`;
 
     // Send to Admin
-    await transporter.sendMail({
-      from: `"IlluminaVista" <${process.env.EMAIL_USER}>`,
-      to: process.env.EMAIL_USER,
+    await resend.emails.send({
+      from: "IlluminaVista <onboarding@resend.dev>",
+      to: process.env.ADMIN_EMAIL,
       replyTo: email,
-      subject: `📩 New Message from ${name}`,
+      subject: `📩 Message from ${name}`,
       html: `
         <h2>New Contact Message</h2>
         <p><strong>Name:</strong> ${name}</p>
         <p><strong>Email:</strong> ${email}</p>
         <p><strong>Phone:</strong> <a href="${whatsapp}">${countryCode} ${phone}</a></p>
         <blockquote>${message}</blockquote>
-      `,
+      `
     });
 
-    // Auto Reply
-    await transporter.sendMail({
-      from: `"IlluminaVista" <${process.env.EMAIL_USER}>`,
+    // Auto Reply to User
+    await resend.emails.send({
+      from: "IlluminaVista <onboarding@resend.dev>",
       to: email,
       subject: "We received your message",
       html: `
@@ -85,7 +77,7 @@ app.post("/api/contact", async (req, res) => {
         <p>Thank you for contacting IlluminaVista.</p>
         <blockquote>${message}</blockquote>
         <p>- Team IlluminaVista</p>
-      `,
+      `
     });
 
     return res.json({ success: true, message: "Message sent successfully" });
