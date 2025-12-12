@@ -7,20 +7,22 @@ const projects = [
     id: 1,
     title: "Royal Wedding Transformation",
     category: "Wedding",
-    before: "/images/generated/wedding_stage_before.png", // Placeholder until generated
-    after: "/images/generated/wedding_stage_after.png",   // Placeholder until generated
-    image: "/images/Weddings & Celebrations/wedding/wedding1.jpg", // Main display image
-    description: "A complete transformation of a standard banquet hall into a royal palace setting with gold drapery and crystal chandeliers.",
-    size: "large", // for bento grid
+    before: "/images/generated/wedding_stage_before.png",
+    after: "/images/generated/wedding_stage_after.png",
+    image: "/images/Weddings & Celebrations/wedding/wedding1.jpg",
+    description:
+      "A complete transformation of a standard banquet hall into a royal palace setting with gold drapery and crystal chandeliers.",
+    size: "large",
   },
   {
     id: 2,
     title: "Neon Pulse DJ Night",
     category: "Concert",
-    before: "/images/generated/corporate_hall_before.png", // Placeholder
+    before: "/images/generated/corporate_hall_before.png",
     after: "/images/generated/dj-night.png",
     image: "/images/generated/dj-night.png",
-    description: "High-energy nightclub setup with beam lights, lasers, and fog machines creating an immersive atmosphere.",
+    description:
+      "High-energy nightclub setup with beam lights, lasers, and fog machines creating an immersive atmosphere.",
     size: "medium",
   },
   {
@@ -30,7 +32,8 @@ const projects = [
     before: "/images/generated/corporate_hall_before.png",
     after: "/images/generated/corporate-launch.png",
     image: "/images/generated/corporate-launch.png",
-    description: "Futuristic stage design for a product launch, featuring a massive curved LED wall and glossy flooring.",
+    description:
+      "Futuristic stage design for a product launch, featuring a massive curved LED wall and glossy flooring.",
     size: "medium",
   },
   {
@@ -40,7 +43,8 @@ const projects = [
     before: "/images/generated/wedding_stage_before.png",
     after: "/images/generated/cultural-fest.png",
     image: "/images/generated/cultural-fest.png",
-    description: "Vibrant traditional decor with warm lighting and hanging lanterns for a cultural celebration.",
+    description:
+      "Vibrant traditional decor with warm lighting and hanging lanterns for a cultural celebration.",
     size: "small",
   },
   {
@@ -48,9 +52,10 @@ const projects = [
     title: "Gala Dinner Experience",
     category: "Corporate",
     before: "/images/generated/corporate_hall_before.png",
-    after: "/images/generated/corporate_hall_after.png", // Placeholder
+    after: "/images/generated/corporate_hall_after.png",
     image: "/images/Corporate events/Annual Gala Night/gala1.jpg",
-    description: "Elegant dining setup with mood lighting and centerpieces for an annual corporate gala.",
+    description:
+      "Elegant dining setup with mood lighting and centerpieces for an annual corporate gala.",
     size: "small",
   },
 ];
@@ -89,10 +94,11 @@ export default function Portfolio() {
           <button
             key={cat}
             onClick={() => setActiveCat(cat)}
-            className={`px-6 py-2 rounded-full font-semibold transition-all duration-300 border ${activeCat === cat
-                ? "bg-champagne text-obsidian border-champagne shadow-[0_0_15px_rgba(212,175,55,0.5)]"
+            className={`px-6 py-2 rounded-full font-semibold transition-all duration-300 border ${
+              activeCat === cat
+                ? "text-gold border-gold shadow-[0_0_15px_rgba(212,175,55,0.5)] bg-transparent"
                 : "bg-transparent text-pearl border-pearl/30 hover:border-champagne hover:text-champagne"
-              }`}
+            }`}
           >
             {cat}
           </button>
@@ -111,14 +117,17 @@ export default function Portfolio() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ duration: 0.5 }}
-              className={`relative rounded-2xl overflow-hidden cursor-pointer group border border-white/10 ${project.size === "large" ? "md:col-span-2 md:row-span-2" : ""
-                } ${project.size === "medium" ? "md:col-span-1 md:row-span-2" : ""}`}
+              className={`relative rounded-2xl overflow-hidden cursor-pointer group border border-white/10
+                ${project.size === "large" ? "md:col-span-2 md:row-span-2" : ""}
+                ${project.size === "medium" ? "md:col-span-1 md:row-span-2" : ""}
+              `}
             >
               <img
                 src={project.image}
                 alt={project.title}
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
               />
+
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity" />
 
               <div className="absolute bottom-0 left-0 p-6 w-full">
@@ -153,14 +162,14 @@ export default function Portfolio() {
                     className="bg-charcoal w-full max-w-5xl rounded-2xl overflow-hidden border border-champagne/20 shadow-2xl flex flex-col md:flex-row max-h-[90vh]"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    {/* Image Section (Before/After Slider could go here, simple toggle for now) */}
+                    {/* Image Section */}
                     <div className="w-full md:w-2/3 h-64 md:h-auto relative bg-black">
                       <BeforeAfterSlider before={project.before} after={project.after} />
                     </div>
 
                     {/* Content Section */}
                     <div className="w-full md:w-1/3 p-8 flex flex-col justify-center bg-midnight">
-                      <p className="text-champagne text-sm font-bold tracking-widest uppercase mb-2">
+                      <p className="text-gold text-sm font-bold tracking-widest uppercase mb-2">
                         {project.category}
                       </p>
                       <h2 className="text-3xl md:text-4xl font-heading text-white mb-6">
@@ -217,11 +226,8 @@ function BeforeAfterSlider({ before, after }) {
         setSliderPosition(percent);
       }}
     >
-      <img
-        src={after}
-        alt="After"
-        className="absolute inset-0 w-full h-full object-cover"
-      />
+      <img src={after} alt="After" className="absolute inset-0 w-full h-full object-cover" />
+
       <div
         className="absolute inset-0 w-full h-full overflow-hidden"
         style={{ width: `${sliderPosition}%` }}
@@ -230,15 +236,18 @@ function BeforeAfterSlider({ before, after }) {
           src={before}
           alt="Before"
           className="absolute inset-0 w-full h-full object-cover max-w-none"
-          // Note: max-w-none and width of parent ensures image doesn't squash
           style={{ width: "100%" }}
         />
-        {/* Label */}
-        <div className="absolute bottom-4 left-4 bg-black/60 text-white px-2 py-1 text-xs rounded">Before</div>
-      </div>
-      <div className="absolute bottom-4 right-4 bg-black/60 text-white px-2 py-1 text-xs rounded">After</div>
 
-      {/* Slider Handle */}
+        <div className="absolute bottom-4 left-4 bg-black/60 text-white px-2 py-1 text-xs rounded">
+          Before
+        </div>
+      </div>
+
+      <div className="absolute bottom-4 right-4 bg-black/60 text-white px-2 py-1 text-xs rounded">
+        After
+      </div>
+
       <div
         className="absolute top-0 bottom-0 w-1 bg-white cursor-ew-resize shadow-[0_0_10px_rgba(0,0,0,0.5)]"
         style={{ left: `${sliderPosition}%` }}

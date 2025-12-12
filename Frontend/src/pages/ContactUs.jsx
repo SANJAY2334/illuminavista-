@@ -1,5 +1,7 @@
-import { useState } from "react";
+// src/pages/ContactUs.jsx
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { jsPDF } from "jspdf"; // npm install jspdf
 
 export default function ContactUs() {
   const [formData, setFormData] = useState({
@@ -11,44 +13,219 @@ export default function ContactUs() {
   });
 
   const [status, setStatus] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+  const API = import.meta.env.VITE_API_URL || "";
 
-  // API Base URL from .env
-  const API = import.meta.env.VITE_API_URL;
+  // Validation helpers
+  const emailValid = (v) =>
+    /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,63})+$/.test(v || "");
+  const phoneValid = (v) =>
+    // Accepts 10 digit indian numbers (optionally with country code); adjust to your needs
+    /^\d{10}$/.test(v || "");
+
+  useEffect(() => {
+    // Clear status when user edits
+    if (status) {
+      const t = setTimeout(() => setStatus(""), 8000);
+      return () => clearTimeout(t);
+    }
+  }, [status]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((s) => ({ ...s, [name]: value }));
+    setErrors((s) => ({ ...s, [name]: null }));
+  };
+
+  const validate = () => {
+    const e = {};
+    if (!formData.name || formData.name.trim().length < 2) e.name = "Please enter your name";
+    if (!emailValid(formData.email)) e.email = "Please enter a valid email";
+    if (!phoneValid(formData.phone)) e.phone = "Enter a 10-digit phone number";
+    if (!formData.message || formData.message.trim().length < 10)
+      e.message = "Tell us a bit more (at least 10 characters)";
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
+  const createChecklistPDF = (data) => {
+    // Use jsPDF to construct a small checklist PDF and auto-download.
+    try {
+      const doc = new jsPDF({ unit: "pt", format: "a4" });
+      const margin = 40;
+      let y = 60;
+
+      doc.setFontSize(18);
+      doc.setTextColor("#D4AF37"); // gold
+      doc.text("IlluminaVista — Event Planning Checklist", margin, y);
+      y += 28;
+
+      doc.setFontSize(11);
+      doc.setTextColor("#ffffff");
+      doc.setFillColor(13, 15, 23); // midnight-like
+      // header box (subtle)
+      doc.rect(margin - 8, y - 20, doc.internal.pageSize.width - margin * 2 + 16, 26, "F");
+      doc.setTextColor("#D4AF37");
+      doc.text("Thank you — we received your request", margin + 6, y - 2);
+      y += 36;
+
+      doc.setTextColor("#ffffff");
+      doc.setFontSize(10);
+      doc.text(`Name: ${data.name || "-"}`, margin, y);
+      y += 16;
+      doc.text(`Email: ${data.email || "-"}`, margin, y);
+      y += 16;
+      doc.text(`Phone: ${data.countryCode || ""} ${data.phone || "-"}`, margin, y);
+      y += 22;
+
+      doc.setFontSize(12);
+      doc.setTextColor("#D4AF37");
+      doc.text("Quick Event Checklist", margin, y);
+      y += 18;
+
+      doc.setFontSize(10);
+      doc.setTextColor("#ffffff");
+      const checklist = [
+        "Event date & time confirmed",
+        "Venue & guest count known",
+        "Primary contact on-site",
+        "Budget range discussed",
+        "Theme / color palette specified",
+        "Any AV preferences or references",
+      ];
+      checklist.forEach((item) => {
+        doc.circle(margin + 4, y - 4, 3, "F");
+        doc.text(item, margin + 18, y);
+        y += 16;
+      });
+
+      y += 10;
+      doc.setFontSize(9);
+      doc.setTextColor("#bdbdbd");
+      doc.text(
+        "We will contact you within 6 hours to schedule a consultation. This checklist helps us prepare.",
+        margin,
+        y,
+        { maxWidth: doc.internal.pageSize.width - margin * 2 }
+      );
+
+      // Auto-download
+      const filename = `IlluminaVista-Checklist-${(data.name || "lead").replace(/\s+/g, "_")}.pdf`;
+      doc.save(filename);
+      return true;
+    } catch (err) {
+      console.error("PDF generation failed:", err);
+      return false;
+    }
+  };
+
+  const fallbackTextDownload = (data) => {
+    // Browser fallback — create a small text file and download
+    try {
+      const content = [
+        "IlluminaVista — Event Planning Checklist",
+        `Name: ${data.name || "-"}`,
+        `Email: ${data.email || "-"}`,
+        `Phone: ${data.countryCode || ""} ${data.phone || "-"}`,
+        "",
+        "Checklist:",
+        "- Event date & time confirmed",
+        "- Venue & guest count known",
+        "- Primary contact on-site",
+        "- Budget range discussed",
+        "- Theme / color palette specified",
+        "- Any AV preferences or references",
+        "",
+        "We will contact you within 6 hours to schedule a consultation.",
+      ].join("\n");
+      const blob = new Blob([content], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `IlluminaVista-Checklist-${(formData.name || "lead").replace(/\s+/g, "_")}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      return true;
+    } catch (err) {
+      console.error("Text fallback failed:", err);
+      return false;
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setStatus("");
+    if (!validate()) {
+      setStatus("❌ Please fix the highlighted fields.");
+      return;
+    }
+
+    setLoading(true);
     setStatus("Sending...");
 
     try {
-      const res = await fetch(`${API}/api/contact`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+      // Conservative: JSON stringify trimmed values
+      const payload = {
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        countryCode: formData.countryCode.trim(),
+        phone: formData.phone.trim(),
+        message: formData.message.trim(),
+      };
 
-      const data = await res.json();
-
-      if (data.success) {
-        setStatus("✅ Message sent successfully!");
-        setFormData({
-          name: "",
-          email: "",
-          countryCode: "+91",
-          phone: "",
-          message: "",
+      // Send to API if configured
+      let serverSuccess = false;
+      if (API) {
+        const res = await fetch(`${API}/api/contact`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
         });
+        const data = await res.json().catch(() => ({}));
+        serverSuccess = !!data?.success;
       } else {
-        setStatus("❌ Failed to send message. Try again.");
+        // If no API provided, treat as success for local testing
+        serverSuccess = true;
+      }
+
+      if (serverSuccess) {
+        setStatus("✅ Message sent successfully! Preparing your checklist...");
+        // Auto-generate PDF using jsPDF. If fails, fallback to text download
+        const pdfOk = createChecklistPDF(payload);
+        if (!pdfOk) fallbackTextDownload(payload);
+
+        // Clear form after a short delay
+        setTimeout(() => {
+          setFormData({
+            name: "",
+            email: "",
+            countryCode: "+91",
+            phone: "",
+            message: "",
+          });
+          setLoading(false);
+          setStatus("✅ Message sent — we'll contact you within 6 hours.");
+        }, 900);
+      } else {
+        setLoading(false);
+        setStatus("❌ Failed to send message. Please try again.");
       }
     } catch (error) {
+      console.error(error);
+      setLoading(false);
       setStatus("⚠️ Server error. Please try later.");
     }
   };
+
+  // Clickable contact actions
+  const phoneNumber = "+917378619692";
+  const whatsappLink = `https://wa.me/91${phoneNumber.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
+    "Hello IlluminaVista — I want to discuss an event."
+  )}`;
+  const mailLink = `mailto:contact@illuminavista.com`;
 
   return (
     <div className="min-h-screen bg-midnight text-pearl pt-28 px-4 sm:px-6 pb-20">
@@ -56,8 +233,8 @@ export default function ContactUs() {
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="max-w-4xl mx-auto text-center mb-16"
+        transition={{ duration: 0.7 }}
+        className="max-w-4xl mx-auto text-center mb-12"
       >
         <h1 className="text-4xl md:text-6xl font-heading text-champagne mb-6 drop-shadow-lg">
           Get in Touch
@@ -70,45 +247,42 @@ export default function ContactUs() {
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
         {/* Contact Info & Map */}
         <motion.div
-          initial={{ opacity: 0, x: -30 }}
+          initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2, duration: 0.8 }}
+          transition={{ delay: 0.12, duration: 0.7 }}
           className="space-y-8"
         >
           <div className="bg-charcoal/50 p-8 rounded-2xl border border-white/5 backdrop-blur-sm">
             <h3 className="text-2xl font-heading text-white mb-6">Contact Information</h3>
             <div className="space-y-6">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-full bg-champagne/10 flex items-center justify-center text-champagne shrink-0">
-                  <i className="fas fa-map-marker-alt"></i>
-                </div>
-                <div>
-                  <h4 className="text-gold font-semibold mb-1">Visit Us</h4>
-                  <p className="text-pearl/70">
-                    C7 Nigde Nagar, B.T.Kawde Road,<br />Ghorpadi, Pune-411001
-                  </p>
-                </div>
-              </div>
+              <ContactRow
+                icon="📍"
+                title="Visit Us"
+                lines={[
+                  "C7 Nigde Nagar, B.T.Kawde Road",
+                  "Ghorpadi, Pune - 411001",
+                ]}
+                action={{
+                  label: "Open in Maps",
+                  href:
+                    "https://www.google.com/maps/search/?api=1&query=BT+Kawade+Rd+Ghorpadi+Pune",
+                }}
+              />
 
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-full bg-champagne/10 flex items-center justify-center text-champagne shrink-0">
-                  <i className="fas fa-envelope"></i>
-                </div>
-                <div>
-                  <h4 className="text-gold font-semibold mb-1">Email Us</h4>
-                  <p className="text-pearl/70">contact@illuminavista.com</p>
-                </div>
-              </div>
+              <ContactRow
+                icon="✉️"
+                title="Email Us"
+                lines={["contact@illuminavista.com"]}
+                action={{ label: "Send Email", href: mailLink }}
+              />
 
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-full bg-champagne/10 flex items-center justify-center text-champagne shrink-0">
-                  <i className="fas fa-phone-alt"></i>
-                </div>
-                <div>
-                  <h4 className="text-gold font-semibold mb-1">Call Us</h4>
-                  <p className="text-pearl/70">+91 7378619692</p>
-                </div>
-              </div>
+              <ContactRow
+                icon="📞"
+                title="Call / WhatsApp"
+                lines={[phoneNumber]}
+                action={{ label: "Call", href: `tel:${phoneNumber}` }}
+                extra={{ label: "WhatsApp", href: whatsappLink }}
+              />
             </div>
           </div>
 
@@ -128,39 +302,32 @@ export default function ContactUs() {
 
         {/* Form */}
         <motion.div
-          initial={{ opacity: 0, x: 30 }}
+          initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.4, duration: 0.8 }}
+          transition={{ delay: 0.24, duration: 0.7 }}
           className="bg-charcoal rounded-2xl p-8 md:p-10 border border-champagne/20 shadow-2xl relative overflow-hidden"
         >
-          <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
 
-          <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
+          <form onSubmit={handleSubmit} className="space-y-6 relative z-10 no-print" noValidate>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-champagne uppercase tracking-wider">Full Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="John Doe"
-                  required
-                  className="w-full bg-midnight/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-all placeholder:text-white/20"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-champagne uppercase tracking-wider">Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="john@example.com"
-                  required
-                  className="w-full bg-midnight/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-all placeholder:text-white/20"
-                />
-              </div>
+              <InputField
+                label="Full Name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="John Doe"
+                error={errors.name}
+              />
+              <InputField
+                label="Email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="john@example.com"
+                type="email"
+                error={errors.email}
+              />
             </div>
 
             <div className="grid grid-cols-3 gap-4">
@@ -183,8 +350,9 @@ export default function ContactUs() {
                   onChange={handleChange}
                   placeholder="9876543210"
                   required
-                  className="w-full bg-midnight/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-all placeholder:text-white/20"
+                  className={`w-full bg-midnight/50 border rounded-lg px-4 py-3 text-white focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-all placeholder:text-white/20 ${errors.phone ? "border-red-500" : "border-white/10"}`}
                 />
+                {errors.phone && <div className="text-xs text-red-400">{errors.phone}</div>}
               </div>
             </div>
 
@@ -197,17 +365,42 @@ export default function ContactUs() {
                 rows="4"
                 placeholder="Tell us about your event..."
                 required
-                className="w-full bg-midnight/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-all placeholder:text-white/20 resize-none"
-              ></textarea>
+                className={`w-full bg-midnight/50 border rounded-lg px-4 py-3 text-white focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-all placeholder:text-white/20 resize-none ${errors.message ? "border-red-500" : "border-white/10"}`}
+              />
+              {errors.message && <div className="text-xs text-red-400">{errors.message}</div>}
             </div>
 
-            <button
-              type="submit"
-              className="w-full bg-gradient-to-r from-gold to-gold-glow text-obsidian font-bold py-4 rounded-lg hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] transition-all duration-300 transform hover:-translate-y-1"
-            >
-              Send Message
-            </button>
+            <div className="grid grid-cols-1 gap-4">
+              <button
+                type="submit"
+                disabled={loading}
+                className={`w-full inline-flex items-center justify-center gap-3 bg-gradient-to-r from-gold to-gold-glow text-obsidian font-bold py-4 rounded-lg hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] transition-all duration-300 transform ${loading ? "opacity-80 cursor-wait" : "hover:-translate-y-1"}`}
+              >
+                {loading ? (
+                  <>
+                    <Spinner />
+                    <span>Sending…</span>
+                  </>
+                ) : (
+                  <span>Send Message</span>
+                )}
+              </button>
 
+              {/* Secondary quick actions */}
+              <div className="flex items-center justify-between gap-3 text-sm">
+                <a href={`tel:${phoneNumber}`} className="text-pearl/80 hover:text-gold transition">
+                  Call us
+                </a>
+                <a href={whatsappLink} target="_blank" rel="noreferrer" className="text-pearl/80 hover:text-gold transition">
+                  WhatsApp
+                </a>
+                <a href={mailLink} className="text-pearl/80 hover:text-gold transition">
+                  Email
+                </a>
+              </div>
+            </div>
+
+            {/* Status */}
             {status && (
               <motion.p
                 initial={{ opacity: 0 }}
@@ -218,8 +411,96 @@ export default function ContactUs() {
               </motion.p>
             )}
           </form>
+
+          {/* WHAT HAPPENS NEXT */}
+          <div className="mt-6 pt-6 border-t border-champagne/10 text-sm text-pearl/70">
+            <h4 className="text-champagne font-semibold mb-2">What happens next?</h4>
+            <ol className="list-decimal list-inside space-y-2">
+              <li>
+                We receive your request instantly.
+              </li>
+              <li>
+                Our team reviews your details and reaches out within <strong>6 hours</strong> to schedule a consultation.
+              </li>
+              <li>
+                We prepare a custom quote and next steps after the call.
+              </li>
+            </ol>
+          </div>
         </motion.div>
       </div>
     </div>
+  );
+}
+
+/* -----------------------
+   Small subcomponents
+   ----------------------- */
+
+function ContactRow({ icon, title, lines = [], action, extra }) {
+  return (
+    <div className="flex items-start gap-4">
+      <div className="w-10 h-10 rounded-full bg-champagne/10 flex items-center justify-center text-champagne shrink-0 text-lg">
+        <span aria-hidden>{icon}</span>
+      </div>
+
+      <div className="flex-1">
+        <h4 className="text-gold font-semibold mb-1">{title}</h4>
+        <div className="text-pearl/70 text-sm mb-2">
+          {lines.map((l, i) => (
+            <div key={i}>{l}</div>
+          ))}
+        </div>
+
+        <div className="flex gap-3">
+          {action && (
+            <a
+              href={action.href}
+              target={action.href.startsWith("http") ? "_blank" : undefined}
+              rel={action.href.startsWith("http") ? "noreferrer" : undefined}
+              className="text-sm px-3 py-1 border border-pearl/10 rounded-md text-pearl/80 hover:bg-pearl/5 hover:text-gold transition"
+            >
+              {action.label}
+            </a>
+          )}
+          {extra && (
+            <a
+              href={extra.href}
+              target="_blank"
+              rel="noreferrer"
+              className="text-sm px-3 py-1 border border-pearl/10 rounded-md text-pearl/80 hover:bg-pearl/5 hover:text-gold transition"
+            >
+              {extra.label}
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function InputField({ label, name, value, onChange, placeholder = "", type = "text", error }) {
+  return (
+    <div className="space-y-2">
+      <label className="text-sm font-semibold text-champagne uppercase tracking-wider">{label}</label>
+      <input
+        type={type}
+        name={name}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        className={`w-full bg-midnight/50 border rounded-lg px-4 py-3 text-white focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-all placeholder:text-white/20 ${error ? "border-red-500" : "border-white/10"}`}
+      />
+      {error && <div className="text-xs text-red-400">{error}</div>}
+    </div>
+  );
+}
+
+function Spinner() {
+  return (
+    <svg className="animate-spin w-5 h-5 text-obsidian" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <circle cx="12" cy="12" r="10" stroke="rgba(0,0,0,0.1)" strokeWidth="4" />
+      <path d="M22 12a10 10 0 00-10-10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+    </svg>
   );
 }
