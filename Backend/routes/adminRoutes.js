@@ -75,13 +75,13 @@ router.post("/reply/:id", adminAuth, async (req, res) => {
   try {
     const resend = new Resend(process.env.RESEND_API_KEY);
     await resend.emails.send({
-      from: "IlluminaVista <onboarding@resend.dev>",
+      from: "VJ Events <onboarding@resend.dev>",
       to: contact.email,
-      subject: "Reply from IlluminaVista",
+      subject: "Reply from VJ Events",
       html: `
         <p>Hello ${contact.name},</p>
         <p>${replyMessage}</p>
-        <p>— IlluminaVista Team</p>
+        <p>— VJ Events Team</p>
       `,
     });
 
@@ -107,9 +107,9 @@ router.delete("/contact/:id", adminAuth, async (req, res) => {
     try {
       const resend = new Resend(process.env.RESEND_API_KEY);
       await resend.emails.send({
-        from: "IlluminaVista <onboarding@resend.dev>",
+        from: "VJ Events <onboarding@resend.dev>",
         to: contact.email,
-        subject: "Notice Regarding Our Services — IlluminaVista",
+        subject: "Notice Regarding Our Services — VJ Events",
         html: `
           <div style="font-family:Arial,sans-serif;padding:20px;">
             <h2>Hello ${contact.name},</h2>

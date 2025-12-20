@@ -85,7 +85,7 @@ export default function AdminRegister() {
               className="w-full p-3 bg-black/30 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[var(--color-gold)] focus:ring-1 focus:ring-[var(--color-gold)] transition-all duration-300"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@illuminavista.com"
+              placeholder="admin@VJ Events.com"
             />
           </div>
 

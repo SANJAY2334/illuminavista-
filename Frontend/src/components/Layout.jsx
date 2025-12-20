@@ -38,14 +38,14 @@ export default function Layout({ children }) {
             >
               {/* Square icon — subtle 3-line glyph */}
               <svg width="18" height="14" viewBox="0 0 18 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-                <rect x="0" y="1" width="18" height="2" rx="1" fill="currentColor"/>
-                <rect x="0" y="6" width="18" height="2" rx="1" fill="currentColor"/>
-                <rect x="0" y="11" width="18" height="2" rx="1" fill="currentColor"/>
+                <rect x="0" y="1" width="18" height="2" rx="1" fill="currentColor" />
+                <rect x="0" y="6" width="18" height="2" rx="1" fill="currentColor" />
+                <rect x="0" y="11" width="18" height="2" rx="1" fill="currentColor" />
               </svg>
             </button>
             {/* Logo */}
             <Link to="/" className="flex items-center ml-3 md:ml-0">
-              <span className="text-champagne font-heading text-lg sm:text-2xl tracking-wide">IlluminaVista</span>
+              <span className="text-champagne font-heading text-lg sm:text-2xl tracking-wide">VJ Events</span>
             </Link>
           </div>
 
@@ -55,15 +55,13 @@ export default function Layout({ children }) {
               <Link
                 key={link.to}
                 to={link.to}
-                className={`relative group text-sm uppercase tracking-widest transition duration-200 ${
-                  location.pathname === link.to ? "text-gold" : "text-pearl hover:text-champagne"
-                }`}
+                className={`relative group text-sm uppercase tracking-widest transition duration-200 ${location.pathname === link.to ? "text-gold" : "text-pearl hover:text-champagne"
+                  }`}
               >
                 {link.name}
                 <span
-                  className={`absolute left-0 -bottom-1 h-[2px] bg-champagne transition-all duration-200 ${
-                    location.pathname === link.to ? "w-full" : "w-0 group-hover:w-full"
-                  }`}
+                  className={`absolute left-0 -bottom-1 h-[2px] bg-champagne transition-all duration-200 ${location.pathname === link.to ? "w-full" : "w-0 group-hover:w-full"
+                    }`}
                 />
               </Link>
             ))}
@@ -100,7 +98,7 @@ export default function Layout({ children }) {
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <span className="text-champagne text-xl font-heading">Menu</span>
-                    <div className="text-pearl/60 text-xs mt-1">IlluminaVista</div>
+                    <div className="text-pearl/60 text-xs mt-1">VJ Events</div>
                   </div>
 
                   {/* Close button */}
@@ -127,9 +125,8 @@ export default function Layout({ children }) {
                         <Link
                           to={link.to}
                           onClick={() => setIsMobileMenuOpen(false)}
-                          className={`flex items-center gap-3 px-2 py-2 rounded-md transition ${
-                            location.pathname === link.to ? "bg-midnight/60 text-gold" : "hover:bg-midnight/50 text-pearl"
-                          }`}
+                          className={`flex items-center gap-3 px-2 py-2 rounded-md transition ${location.pathname === link.to ? "bg-midnight/60 text-gold" : "hover:bg-midnight/50 text-pearl"
+                            }`}
                         >
                           {/* Icon */}
                           <span className="w-5 h-5 flex-shrink-0 text-pearl/80">
@@ -148,7 +145,7 @@ export default function Layout({ children }) {
                 <div className="pt-4 mt-auto">
                   <div className="h-px bg-champagne/10 mb-4" />
                   <div className="text-xs text-pearl/60">
-                    © {new Date().getFullYear()} IlluminaVista
+                    © {new Date().getFullYear()} VJ Events
                   </div>
                 </div>
               </div>
@@ -166,7 +163,7 @@ export default function Layout({ children }) {
       <footer className="bg-midnight relative border-t border-champagne/20 mt-20 z-10">
         <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-champagne to-transparent" />
         <div className="max-w-7xl mx-auto px-6 py-12 text-center">
-          <h2 className="text-2xl font-heading text-champagne mb-2">IlluminaVista</h2>
+          <h2 className="text-2xl font-heading text-champagne mb-2">VJ Events</h2>
           <p className="text-pearl/60 text-sm max-w-md mx-auto">
             Crafting unforgettable experiences through light, sound, and precision planning.
           </p>
@@ -182,7 +179,7 @@ export default function Layout({ children }) {
           </div>
 
           <p className="text-xs text-pearl/40 tracking-wider uppercase">
-            &copy; {new Date().getFullYear()} IlluminaVista. All rights reserved.
+            &copy; {new Date().getFullYear()} VJ Events. All rights reserved.
           </p>
         </div>
       </footer>
@@ -198,8 +195,8 @@ export default function Layout({ children }) {
 function HomeIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path d="M3 11.5L12 4l9 7.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M5 12v7a1 1 0 001 1h3v-5h6v5h3a1 1 0 001-1v-7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M3 11.5L12 4l9 7.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M5 12v7a1 1 0 001 1h3v-5h6v5h3a1 1 0 001-1v-7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -207,9 +204,9 @@ function HomeIcon() {
 function ServicesIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path d="M12 2v6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M5 7h14l-1 10H6L5 7z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M9 22h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M12 2v6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M5 7h14l-1 10H6L5 7z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M9 22h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -217,9 +214,9 @@ function ServicesIcon() {
 function ProductsIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <rect x="3" y="7" width="18" height="12" rx="2" stroke="currentColor" strokeWidth="1.5"/>
-      <path d="M16 3v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-      <path d="M8 3v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      <rect x="3" y="7" width="18" height="12" rx="2" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M16 3v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M8 3v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   );
 }
@@ -227,9 +224,9 @@ function ProductsIcon() {
 function PortfolioIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <rect x="3" y="7" width="18" height="12" rx="2" stroke="currentColor" strokeWidth="1.5"/>
-      <path d="M7 11h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-      <path d="M7 15h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      <rect x="3" y="7" width="18" height="12" rx="2" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M7 11h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M7 15h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   );
 }
@@ -237,7 +234,7 @@ function PortfolioIcon() {
 function ContactIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }

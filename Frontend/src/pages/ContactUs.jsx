@@ -58,7 +58,7 @@ export default function ContactUs() {
 
       doc.setFontSize(18);
       doc.setTextColor("#D4AF37"); // gold
-      doc.text("IlluminaVista — Event Planning Checklist", margin, y);
+      doc.text("VJ Events — Event Planning Checklist", margin, y);
       y += 28;
 
       doc.setFontSize(11);
@@ -111,7 +111,7 @@ export default function ContactUs() {
       );
 
       // Auto-download
-      const filename = `IlluminaVista-Checklist-${(data.name || "lead").replace(/\s+/g, "_")}.pdf`;
+      const filename = `VJ Events-Checklist-${(data.name || "lead").replace(/\s+/g, "_")}.pdf`;
       doc.save(filename);
       return true;
     } catch (err) {
@@ -124,7 +124,7 @@ export default function ContactUs() {
     // Browser fallback — create a small text file and download
     try {
       const content = [
-        "IlluminaVista — Event Planning Checklist",
+        "VJ Events — Event Planning Checklist",
         `Name: ${data.name || "-"}`,
         `Email: ${data.email || "-"}`,
         `Phone: ${data.countryCode || ""} ${data.phone || "-"}`,
@@ -143,7 +143,7 @@ export default function ContactUs() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `IlluminaVista-Checklist-${(formData.name || "lead").replace(/\s+/g, "_")}.txt`;
+      a.download = `VJ Events-Checklist-${(formData.name || "lead").replace(/\s+/g, "_")}.txt`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -223,9 +223,9 @@ export default function ContactUs() {
   // Clickable contact actions
   const phoneNumber = "+917378619692";
   const whatsappLink = `https://wa.me/91${phoneNumber.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
-    "Hello IlluminaVista — I want to discuss an event."
+    "Hello VJ Events — I want to discuss an event."
   )}`;
-  const mailLink = `mailto:contact@illuminavista.com`;
+  const mailLink = `mailto:contact@VJ Events.com`;
 
   return (
     <div className="min-h-screen bg-midnight text-pearl pt-28 px-4 sm:px-6 pb-20">
@@ -272,7 +272,7 @@ export default function ContactUs() {
               <ContactRow
                 icon="✉️"
                 title="Email Us"
-                lines={["contact@illuminavista.com"]}
+                lines={["contact@VJ Events.com"]}
                 action={{ label: "Send Email", href: mailLink }}
               />
 

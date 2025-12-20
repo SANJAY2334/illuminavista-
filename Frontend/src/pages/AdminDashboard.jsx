@@ -90,7 +90,7 @@ export default function AdminDashboard() {
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="flex justify-between items-center mb-10">
           <h1 className="text-3xl font-bold tracking-widest text-[var(--color-gold)]">
-            IlluminaVista <span className="text-white text-lg font-light opacity-80 block md:inline md:ml-2">Admin Dashboard</span>
+            VJ Events <span className="text-white text-lg font-light opacity-80 block md:inline md:ml-2">Admin Dashboard</span>
           </h1>
           <button
             onClick={logout}
@@ -207,7 +207,7 @@ export default function AdminDashboard() {
                   <button
                     onClick={() => {
                       setSelected(null);
-                      setReplyText("");  
+                      setReplyText("");
                     }}
                     className="px-6 py-2 rounded-lg border border-gray-600 text-gray-300 hover:bg-gray-800 transition-colors"
                   >

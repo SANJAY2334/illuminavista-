@@ -35,12 +35,12 @@ export default function Home() {
           className="relative text-center px-4"
         >
           <h1 className="text-5xl sm:text-6xl md:text-7xl font-heading text-champagne drop-shadow-lg">
-            IlluminaVista
+            VJ Events
           </h1>
           <p className="mt-6 text-lg sm:text-xl text-pearl/90 max-w-xl mx-auto">
             Where Vision meets Precision
           </p>
-          
+
         </motion.div>
       </section>
 
@@ -57,7 +57,7 @@ export default function Home() {
             transition={{ duration: 0.6 }}
             className="text-4xl sm:text-5xl font-heading text-center mb-12 text-champagne"
           >
-            About IlluminaVista
+            About VJ Events
           </motion.h2>
 
           <motion.div
@@ -69,7 +69,7 @@ export default function Home() {
           >
             <div className="space-y-6 text-lg leading-relaxed text-pearl/90">
               <p>
-                At IlluminaVista, we believe every event is more than just a
+                At VJ Events, we believe every event is more than just a
                 gathering—it’s a story waiting to be told. We specialize in
                 crafting immersive experiences that blend the art of lighting
                 and sound with the science of precision planning.
@@ -99,7 +99,7 @@ export default function Home() {
                 breathtaking results.
               </p>
               <p>
-                At IlluminaVista, every event is an opportunity to inspire. We
+                At VJ Events, every event is an opportunity to inspire. We
                 don’t settle for good—we aim for unforgettable.
               </p>
             </div>

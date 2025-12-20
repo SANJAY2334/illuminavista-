@@ -30,7 +30,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 // --- Health Check ---
 app.get("/", (req, res) => {
-  res.json({ status: "OK", message: "IlluminaVista Backend Running" });
+  res.json({ status: "OK", message: "VJ Events Backend Running" });
 });
 
 // --- Admin Routes ---
@@ -52,7 +52,7 @@ app.post("/api/contact", async (req, res) => {
 
     // --- Send to Admin ---
     await resend.emails.send({
-      from: "IlluminaVista <onboarding@resend.dev>",
+      from: "VJ Events <onboarding@resend.dev>",
       to: process.env.ADMIN_EMAIL,
       replyTo: email,
       subject: `📩 Message from ${name}`,
@@ -67,14 +67,14 @@ app.post("/api/contact", async (req, res) => {
 
     // --- Auto reply to user ---
     await resend.emails.send({
-      from: "IlluminaVista <onboarding@resend.dev>",
+      from: "VJ Events <onboarding@resend.dev>",
       to: email,
       subject: "We received your message",
       html: `
         <h2>Hello ${name},</h2>
-        <p>Thank you for contacting IlluminaVista.</p>
+        <p>Thank you for contacting VJ Events.</p>
         <blockquote>${message}</blockquote>
-        <p>- Team IlluminaVista</p>
+        <p>- Team VJ Events</p>
       `,
     });
 
